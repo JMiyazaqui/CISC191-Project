@@ -1,8 +1,14 @@
-public class Animal {
+public abstract class Animal {
+    private String name;
     private String healthStatus;
 
-    public Animal() {
-        this.healthStatus = "Hungry"; // Default state
+    public Animal(String name, String healthStatus) {
+        this.name = name;
+        this.healthStatus = healthStatus;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getHealthStatus() {
@@ -10,11 +16,13 @@ public class Animal {
     }
 
     public void feed() {
-        healthStatus = "Healthy";
+        this.healthStatus = "Healthy";
     }
+
+    public abstract String getType();
 
     @Override
     public String toString() {
-        return "Animal (" + healthStatus + ")";
+        return getType() + " (" + healthStatus + ")";
     }
 }

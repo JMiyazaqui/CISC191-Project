@@ -1,17 +1,10 @@
 public class Penguin extends Animal {
-    public Penguin() {
-        super();
-    }
-
-    /**
-     * Specific behavior for a Penguin to swim.
-     */
-    public void swim() {
-        System.out.println("The penguin happily swims in the water!");
+    public Penguin(String name, String healthStatus) {
+        super(name, healthStatus);
     }
 
     @Override
-    public String toString() {
-        return "Penguin (" + getHealthStatus() + ")";
+    public String getType() {
+        return "Penguin";
     }
 }

@@ -1,91 +1,75 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
+import java.io.IOException;
 
 public class ZooGUI {
     private Zoo zoo;
     private JFrame frame;
-    private JTextArea animalListArea;
+    private JTextArea displayArea;
 
     public ZooGUI() {
         zoo = new Zoo();
         frame = new JFrame("Zoo Management Game");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(400, 400);
+        frame.setSize(600, 400);
+        displayArea = new JTextArea();
+        displayArea.setEditable(false);
+        frame.add(new JScrollPane(displayArea), BorderLayout.CENTER);
 
-        animalListArea = new JTextArea();
-        animalListArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(animalListArea);
+        JPanel panel = new JPanel();
+        JButton addLionButton = new JButton("Add Lion");
+        JButton addPenguinButton = new JButton("Add Penguin");
+        JButton addElephantButton = new JButton("Add Elephant");
+        JButton feedButton = new JButton("Feed Animals");
+        JButton saveButton = new JButton("Save");
+        JButton loadButton = new JButton("Load");
 
-        JButton addButton = new JButton("Add Animal");
-        JButton feedButton = new JButton("Feed Animal");
+        panel.add(addLionButton);
+        panel.add(addPenguinButton);
+        panel.add(addElephantButton);
+        panel.add(feedButton);
+        panel.add(saveButton);
+        panel.add(loadButton);
+        frame.add(panel, BorderLayout.SOUTH);
 
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String[] options = {"Lion", "Penguin", "Elephant"};
-                String animalType = (String) JOptionPane.showInputDialog(
-                    frame,
-                    "Select an animal to add:",
-                    "Add Animal",
-                    JOptionPane.PLAIN_MESSAGE,
-                    null,
-                    options,
-                    options[0]
-                );
-
-                if (animalType != null) {
-                    switch (animalType) {
-                        case "Lion" -> zoo.addAnimal(new Lion());
-                        case "Penguin" -> zoo.addAnimal(new Penguin());
-                        case "Elephant" -> zoo.addAnimal(new Elephant());
-                    }
-                    refreshAnimalList();
-                }
+        addLionButton.addActionListener(e -> addAnimal(new Lion("Lion" + (zoo.getAnimals().size() + 1), "Hungry")));
+        addPenguinButton.addActionListener(e -> addAnimal(new Penguin("Penguin" + (zoo.getAnimals().size() + 1), "Hungry")));
+        addElephantButton.addActionListener(e -> addAnimal(new Elephant("Elephant" + (zoo.getAnimals().size() + 1), "Hungry")));
+        feedButton.addActionListener(e -> {
+            zoo.feedAllAnimals();
+            updateDisplay();
+        });
+        saveButton.addActionListener(e -> {
+            try {
+                zoo.saveToFile("zoo.txt");
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(frame, "Error saving file: " + ex.getMessage());
+            }
+        });
+        loadButton.addActionListener(e -> {
+            try {
+                zoo.loadFromFile("zoo.txt");
+                updateDisplay();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(frame, "Error loading file: " + ex.getMessage());
             }
         });
 
-        feedButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String animalType = JOptionPane.showInputDialog(
-                    frame,
-                    "Enter the type of animal to feed (e.g., Lion, Elephant, Penguin):",
-                    "Feed Animal",
-                    JOptionPane.PLAIN_MESSAGE
-                );
-
-                if (animalType != null && !animalType.trim().isEmpty()) {
-                    boolean success = zoo.feedAnimal(animalType);
-                    if (success) {
-                        JOptionPane.showMessageDialog(frame, animalType + " has been fed and is now healthy!");
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "No " + animalType + " found in the zoo!");
-                    }
-
-                    // Refresh the animal list display
-                    refreshAnimalList();
-                }
-            }
-        });
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.add(addButton);
-        buttonPanel.add(feedButton);
-
-        frame.setLayout(new BorderLayout());
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(buttonPanel, BorderLayout.SOUTH);
         frame.setVisible(true);
     }
 
-    private void refreshAnimalList() {
-        StringBuilder animalListText = new StringBuilder("Animals in the zoo:\n");
+    private void addAnimal(Animal animal) {
+        zoo.addAnimal(animal);
+        updateDisplay();
+    }
+
+    private void updateDisplay() {
+        StringBuilder builder = new StringBuilder();
         for (Animal animal : zoo.getAnimals()) {
-            animalListText.append("- ").append(animal).append("\n");
+            builder.append(animal).append("\n");
         }
-        animalListArea.setText(animalListText.toString());
+        displayArea.setText(builder.toString());
     }
 
     public static void main(String[] args) {
